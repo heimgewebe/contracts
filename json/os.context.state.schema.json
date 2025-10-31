@@ -1,0 +1,60 @@
+{
+  "$id": "https://heimgewebe.de/schemas/os.context.state.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "OS Context State",
+  "type": "object",
+  "required": [
+    "contextId",
+    "collectedAt",
+    "state"
+  ],
+  "properties": {
+    "contextId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "collectedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "state": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": [
+            "active",
+            "idle",
+            "maintenance"
+          ]
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": true
+    },
+    "eventId": {
+      "type": "string"
+    },
+    "eventType": {
+      "type": "string"
+    },
+    "occurredAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "payload": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "context": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    }
+  },
+  "additionalProperties": true
+}
