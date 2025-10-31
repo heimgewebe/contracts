@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package heimgewebe.heimlern.v1;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/heimgewebe/contracts/gen/go/heimgewebe/heimlern/v1;heimlernv1";
+
+// Decision encapsulates the outcome of the Heimlern recommendation engine.
+message Decision {
+  // Immutable identifier for the decision.
+  string decision_id = 1;
+
+  // Identifier of the learner the decision was produced for.
+  string learner_id = 2;
+
+  // Ranked list of considered options.
+  repeated Option options = 3;
+
+  // Moment the decision was finalised.
+  google.protobuf.Timestamp decided_at = 4;
+
+  // Arbitrary metadata that accompanies the decision.
+  map<string, string> metadata = 5;
+}
+
+// Option represents a single recommended item.
+message Option {
+  string id = 1;
+  string label = 2;
+  double score = 3;
+}

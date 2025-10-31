@@ -1,0 +1,44 @@
+name: contracts-validate
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/validate.yml'
+      - 'proto/**'
+      - 'json/**'
+      - 'fixtures/**'
+  pull_request:
+    paths:
+      - '.github/workflows/validate.yml'
+      - 'proto/**'
+      - 'json/**'
+      - 'fixtures/**'
+  workflow_dispatch:
+
+jobs:
+  buf-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4 # v4 (major tag)
+      - uses: bufbuild/buf-setup-action@v1 # v1 (major tag)
+      - run: buf lint
+      - name: Detect default branch
+        id: def
+        run: echo "branch=${{ github.event.repository.default_branch || 'main' }}" >> "$GITHUB_OUTPUT"
+      - run: buf breaking --against ".git#branch=${{ steps.def.outputs.branch }}" || true
+
+  ajv-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4 # v4 (major tag)
+      - uses: actions/setup-node@v4 # v4 (major tag)
+        with:
+          node-version: 20
+      - run: npx --yes ajv-cli@5 compile -s 'json/**/*.schema.json' --strict=true --spec=draft2020
+      - name: Validate fixtures (if any)
+        run: |
+          if compgen -G 'fixtures/**/*.jsonl' >/dev/null; then
+            npx --yes ajv-cli@5 validate -s 'json/**/*.schema.json' -d 'fixtures/**/*.jsonl' --spec=draft2020 --errors=line --all-errors
+          else
+            echo '::notice::No fixtures found; skipping validation.'
+          fi

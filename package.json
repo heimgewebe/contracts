@@ -1,0 +1,14 @@
+{
+  "name": "@heimgewebe/contracts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "lint:proto": "buf lint",
+    "check:breaking": "buf breaking --against '.git#branch=main' || true",
+    "test:json": "ajv validate -s 'json/**/*.schema.json' -d 'fixtures/**/*.jsonl' --spec=draft2020 --errors=line"
+  },
+  "devDependencies": {
+    "ajv-cli": "^5.0.0"
+  }
+}

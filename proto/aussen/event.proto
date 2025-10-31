@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package heimgewebe.aussen.v1;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/heimgewebe/contracts/gen/go/heimgewebe/aussen/v1;aussenv1";
+
+// EventEnvelope describes a domain event that originated from the Aussen boundary
+// of the Heimgewebe ecosystem. It provides a consistent contract for external
+// consumers that rely on asynchronous event payloads.
+message EventEnvelope {
+  // Unique identifier for the event instance.
+  string id = 1;
+
+  // Semantic type of the event.
+  string event_type = 2;
+
+  // Timestamp when the event was produced.
+  google.protobuf.Timestamp occurred_at = 3;
+
+  // Business payload that triggered the event.
+  Payload payload = 4;
+
+  // Optional contextual information that accompanies the event.
+  Context context = 5;
+}
+
+// Payload captures business specific information about the event.
+message Payload {
+  string description = 1;
+  repeated string tags = 2;
+}
+
+// Context contains arbitrary metadata to help downstream services enrich the event.
+message Context {
+  map<string, string> attributes = 1;
+}
