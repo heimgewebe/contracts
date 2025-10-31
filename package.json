@@ -4,11 +4,12 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "lint:proto": "buf lint",
-    "check:breaking": "buf breaking --against '.git#branch=main' || true",
-    "test:json": "ajv validate -s 'json/**/*.schema.json' -d 'fixtures/**/*.jsonl' --spec=draft2020 --errors=line"
+    "lint:proto": "cd proto && buf lint",
+    "check:breaking": "cd proto && buf breaking --against '../.git#branch=main' || true",
+    "test:json": "node scripts/validate-json.js"
   },
   "devDependencies": {
+    "ajv": "^8.17.1",
     "ajv-cli": "^5.0.0"
   }
 }
