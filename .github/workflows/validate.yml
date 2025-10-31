@@ -1,4 +1,5 @@
 name: contracts-validate
+# Limit the default GITHUB_TOKEN scope for all jobs unless overridden locally.
 permissions:
   contents: read
 on:
@@ -39,11 +40,15 @@ jobs:
           buf_version: 1.43.0
       - run: buf lint
         working-directory: proto
-      - run: buf breaking --against ".git#branch=${{ steps.def.outputs.branch }}"
+      # Hinweis: working-directory=proto → .git liegt eine Ebene höher
+      - run: buf breaking --against "../.git#branch=${{ steps.def.outputs.branch }}"
         working-directory: proto
 
   ajv-validate:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: write   # benötigt für actions/cache@v4, um Caches zu schreiben
     steps:
       - uses: actions/checkout@v4 # v4 (major tag)
       - uses: actions/setup-node@v4 # v4 (major tag)
