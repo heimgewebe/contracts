@@ -1,4 +1,6 @@
 name: contracts-validate
+permissions:
+  contents: read
 on:
   push:
     branches: [ main ]
@@ -7,12 +9,14 @@ on:
       - 'proto/**'
       - 'json/**'
       - 'fixtures/**'
+      - 'buf.lock'
   pull_request:
     paths:
       - '.github/workflows/validate.yml'
       - 'proto/**'
       - 'json/**'
       - 'fixtures/**'
+      - 'buf.lock'
   workflow_dispatch:
 
 jobs:
@@ -20,12 +24,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4 # v4 (major tag)
-      - uses: bufbuild/buf-setup-action@v1 # v1 (major tag)
-      - run: buf lint
+        with:
+          # Full history so we can compare against the default branch on PRs
+          fetch-depth: 0
       - name: Detect default branch
         id: def
         run: echo "branch=${{ github.event.repository.default_branch || 'main' }}" >> "$GITHUB_OUTPUT"
-      - run: buf breaking --against ".git#branch=${{ steps.def.outputs.branch }}" || true
+      - name: Fetch default branch ref
+        run: |
+          git fetch --no-tags origin "${{ steps.def.outputs.branch }}:${{ steps.def.outputs.branch }}"
+          git branch --list | sed 's/^/* /'
+      - uses: bufbuild/buf-setup-action@v1 # v1 (major tag)
+        with:
+          buf_version: 1.43.0
+      - run: buf lint
+        working-directory: proto
+      - run: buf breaking --against ".git#branch=${{ steps.def.outputs.branch }}"
+        working-directory: proto
 
   ajv-validate:
     runs-on: ubuntu-latest
@@ -34,6 +49,13 @@ jobs:
       - uses: actions/setup-node@v4 # v4 (major tag)
         with:
           node-version: 20
+      - name: Cache npm
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node20-ajv-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node20-ajv-
       - run: npx --yes ajv-cli@5 compile -s 'json/**/*.schema.json' --strict=true --spec=draft2020
       - name: Validate fixtures (if any)
         run: |
