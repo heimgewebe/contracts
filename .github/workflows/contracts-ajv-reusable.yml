@@ -39,7 +39,7 @@ jobs:
           node-version: "22"
           cache: "npm"
 
-      - name: Install deps (robust, offline-freundlich)
+      - name: Install deps (robust, offline-friendly)
         run: |
           set -euo pipefail
           if [ -f package-lock.json ] || [ -f npm-shrinkwrap.json ]; then
