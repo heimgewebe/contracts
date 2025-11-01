@@ -1,0 +1,108 @@
+name: contracts-ajv-reusable
+
+# Dieser Workflow wird aus anderen Repos via
+# uses: heimgewebe/contracts/.github/workflows/contracts-ajv-reusable.yml@<ref>
+# aufgerufen. Er validiert JSONL-Fixtures des *Caller*-Repos gegen dessen
+# Schemas unter contracts/** oder schemas/**.
+
+on:
+  workflow_call:
+    inputs:
+      fixtures_glob:
+        description: "Glob der zu validierenden JSON/JSONL Fixtures im Caller-Repo"
+        type: string
+        required: false
+        default: "fixtures/**/*.jsonl"
+    secrets: {}
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash --noprofile --norc -eo pipefail {0}
+
+jobs:
+  validate:
+    name: Validate fixtures with AJV
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout caller repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+
+      - name: Setup Node.js (v22)
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install deps (robust, offline-freundlich)
+        run: |
+          set -euo pipefail
+          if [ -f package-lock.json ] || [ -f npm-shrinkwrap.json ]; then
+            npm ci --ignore-scripts --no-audit --prefer-offline
+          elif [ -f package.json ]; then
+            npm i --ignore-scripts --no-audit --prefer-offline
+          else
+            # Minimalfall: wir benutzen npx ajv ohne lokales package.json
+            echo "No package.json found; will use npx ajv directly."
+          fi
+
+      - name: Validate fixtures
+        env:
+          FG: ${{ inputs.fixtures_glob }}
+        run: |
+          set -euo pipefail
+          fg="${FG:-fixtures/**/*.jsonl}"
+
+          echo "::group::Detect schemas"
+          # Wir unterstützen sowohl contracts/** als auch schemas/** im *Caller*-Repo.
+          # Beide Wurzeln können parallel existieren.
+          mapfile -t schema_globs < <(printf '%s\n' \
+            "contracts/**/*.schema.json" \
+            "schemas/**/*.schema.json")
+
+          # Sammle existierende Schema-Dateien
+          schemas=()
+          for g in "${schema_globs[@]}"; do
+            while IFS= read -r -d '' f; do schemas+=("$f"); done < <(git ls-files -z -- "$g" || true)
+          done
+
+          if (( ${#schemas[@]} == 0 )); then
+            echo "::error::No schemas found under contracts/** or schemas/**"
+            exit 1
+          fi
+          printf 'Found %d schema files\n' "${#schemas[@]}"
+          printf '  - %s\n' "${schemas[@]}"
+          echo "::endgroup::"
+
+          echo "::group::Validate with AJV"
+          # Bevorzugt projekt-eigenes Script, sonst AJV-CLI Fallback (fixe, bekannte Version)
+          if [ -f scripts/validate-json.js ]; then
+            echo "Using project script: scripts/validate-json.js"
+            node scripts/validate-json.js
+          else
+            echo "Using AJV CLI fallback"
+            # Hinweis: Mehrere -s Flags erlaubt; wir geben alle gefundenen Schemas mit.
+            # Draft 2020, Fehler als Zeilen (kompakt) ausgeben.
+            set -x
+            npx --yes ajv@8.17.1 validate \
+              $(printf -- " -s %q" "${schemas[@]}") \
+              -d "${fg}" \
+              --spec=draft2020 --errors=line
+            set +x
+          fi
+          echo "::endgroup::"
+
+      - name: Summary
+        if: success()
+        run: |
+          echo "✅ AJV validation passed for \`${{ inputs.fixtures_glob }}\`" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Summary (on failure)
+        if: failure()
+        run: |
+          echo "❌ AJV validation failed for \`${{ inputs.fixtures_glob }}\`" >> "$GITHUB_STEP_SUMMARY"
