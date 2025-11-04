@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "lint:proto": "buf lint",
-    "check:breaking": "buf breaking --against '.git#branch=main' || true",
+    "check:breaking": "buf breaking --against .git#branch=main || true",
     "test:json": "node scripts/validate-json.js"
   },
   "devDependencies": {
