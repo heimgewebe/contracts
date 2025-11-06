@@ -71,7 +71,7 @@ async function main() {
   }
 
   if (hasErrors) {
-    process.exitCode = 1;
+    process.exit(1);
   }
 }
 
