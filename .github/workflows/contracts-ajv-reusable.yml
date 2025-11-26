@@ -1,9 +1,10 @@
+---
 name: "contracts-ajv-reusable"
 
 permissions:
   contents: read
 
-on:
+"on":
   # Usage from a caller:
   # uses: heimgewebe/contracts/.github/workflows/contracts-ajv-reusable.yml@contracts-v1
   workflow_call:
@@ -120,8 +121,12 @@ jobs:
           [[ -d "$ROOT" ]] || { echo "::error::Schema dir not found: $ROOT"; exit 1; }
 
           # Use find -path so wildcards in SCHEMA_PATTERN are evaluated by find
-          mapfile -t schemas < <(find "$ROOT" -type f -path "$ROOT/$SCHEMA_PATTERN" -print | sort || true)
-          (( ${#schemas[@]} > 0 )) || { echo "::error::No schemas found under $ROOT matching '$SCHEMA_PATTERN'"; exit 1; }
+          mapfile -t schemas < <(find "$ROOT" -type f -path "$ROOT/$SCHEMA_PATTERN" \
+            -print | sort || true)
+          if (( ${#schemas[@]} == 0 )); then
+            echo "::error::No schemas found under $ROOT matching '$SCHEMA_PATTERN'"
+            exit 1
+          fi
 
           count=0
           for schema in "${schemas[@]}"; do
@@ -162,12 +167,14 @@ jobs:
             base="${base%.jsonl}"
             base="${base%.json}"
 
-            # Look up schema by canonical name: <base>.schema.json (flat lookup under schema_dir)
-            mapfile -t candidates < <(find "_contracts/${SCHEMA_DIR}" -type f -name "${base}.schema.json" -print | sort || true)
+            # Look up schema by canonical name: <base>.schema.json
+            mapfile -t candidates < <(find "_contracts/${SCHEMA_DIR}" -type f \
+              -name "${base}.schema.json" -print | sort || true)
 
             echo "::group::Validate ${fixture}"
             if (( ${#candidates[@]} == 0 )); then
-              echo "::warning file=${fixture}::No matching schema ('${base}.schema.json') under _contracts/${SCHEMA_DIR}"
+              msg="No matching schema ('${base}.schema.json') under _contracts/${SCHEMA_DIR}"
+              echo "::warning file=${fixture}::${msg}"
               if [[ "${FAIL_MISSING}" == "true" ]]; then
                 echo "::error::Missing schema and fail_on_missing_schema=true"
                 ((fail++))
@@ -180,7 +187,8 @@ jobs:
                 printf "  - %s\n" "${candidates[@]}"
               fi
               schema="${candidates[0]}"
-              args=(validate -s "$schema" -d "$fixture" --spec="$SPEC" --all-errors --validate-formats=true --errors=line)
+              args=(validate -s "$schema" -d "$fixture" --spec="$SPEC")
+              args+=(--all-errors --validate-formats=true --errors=line)
               if [[ "$STRICT" == "true" ]]; then args+=(--strict=true); fi
               if ! npx --yes "ajv-cli@${AJV_VER}" "${args[@]}"; then
                 ((fail++))
