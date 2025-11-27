@@ -3,7 +3,6 @@ name: "📊 Metrics Snapshot & Validation"
 permissions:
   contents: read          # Repo lesen, um Skripte auszuführen
   actions: write          # notwendig für upload-artifact
-  checks: write
 "on":
   workflow_dispatch:
   schedule:
@@ -20,6 +19,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Ensure Node for ajv-cli
         uses: actions/setup-node@v4
@@ -34,7 +35,7 @@ jobs:
           curl -fsSL "$METRICS_SCHEMA_URL" -o .ci/metrics.schema.json
 
       - name: Validate metrics contract
-        run: npx --yes ajv-cli@5 validate -s .ci/metrics.schema.json -d metrics.json
+        run: npx --yes ajv-cli@5 validate -s .ci/metrics.schema.json -d metrics.json --spec=draft2020
 
       - name: Optional POST to hausKI
         if: ${{ env.HAUSKI_POST_URL && env.HAUSKI_POST_URL != '' }}
