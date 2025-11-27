@@ -4,13 +4,13 @@
   "title": "Aussen Event",
   "type": "object",
   "required": [
-    "eventId",
+    "id",
     "eventType",
     "occurredAt",
     "payload"
   ],
   "properties": {
-    "eventId": {
+    "id": {
       "type": "string",
       "minLength": 1
     },
@@ -28,7 +28,8 @@
       ],
       "properties": {
         "description": {
-          "type": "string"
+          "type": "string",
+          "minLength": 1
         },
         "tags": {
           "type": "array",
@@ -37,7 +38,7 @@
           }
         }
       },
-      "additionalProperties": true
+      "additionalProperties": false
     },
     "context": {
       "type": "object",
@@ -45,19 +46,9 @@
       "additionalProperties": {
         "type": "string"
       }
-    },
-    "contextId": {
-      "type": "string"
-    },
-    "collectedAt": {
-      "$ref": "#/$defs/dateTimeString"
-    },
-    "state": {
-      "type": "object",
-      "additionalProperties": true
     }
   },
-  "additionalProperties": true,
+  "additionalProperties": false,
   "$defs": {
     "dateTimeString": {
       "type": "string",
