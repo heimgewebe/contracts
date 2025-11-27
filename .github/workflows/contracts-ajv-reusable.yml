@@ -86,7 +86,6 @@ jobs:
         with:
           node-version: ${{ inputs.node_version }}
           check-latest: true
-          cache: "npm"
 
       - name: Cache npm & node-gyp
         uses: actions/cache@v4
