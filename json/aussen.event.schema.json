@@ -1,12 +1,12 @@
 {
   "$id": "https://heimgewebe.de/schemas/aussen.event.schema.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Aussen Event",
+  "title": "Aussen Event (derived from heimgewebe/aussen/v1/event.proto)",
   "type": "object",
   "required": [
     "id",
-    "eventType",
-    "occurredAt",
+    "event_type",
+    "occurred_at",
     "payload"
   ],
   "properties": {
@@ -14,11 +14,11 @@
       "type": "string",
       "minLength": 1
     },
-    "eventType": {
+    "event_type": {
       "type": "string",
       "minLength": 1
     },
-    "occurredAt": {
+    "occurred_at": {
       "$ref": "#/$defs/dateTimeString"
     },
     "payload": {
@@ -42,10 +42,16 @@
     },
     "context": {
       "type": "object",
-      "default": {},
-      "additionalProperties": {
-        "type": "string"
-      }
+      "properties": {
+        "attributes": {
+          "type": "object",
+          "default": {},
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
     }
   },
   "additionalProperties": false,
