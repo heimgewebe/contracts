@@ -9,3 +9,5 @@ plugins:
     out: gen/go
     opt:
       - paths=source_relative
+  - plugin: buf.build/community/jsonschema
+    out: json

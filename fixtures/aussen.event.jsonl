@@ -1,1 +1,1 @@
-{"eventId":"evt-123","eventType":"heimlern.decision","occurredAt":"2024-03-12T10:15:30Z","payload":{"description":"Decision issued for learner","tags":["beta","preview"]},"context":{"source":"heimlern-app","locale":"de-DE"},"contextId":"ctx-42","collectedAt":"2024-03-12T10:15:30Z","state":{"mode":"active","version":3}}
+{"id":"evt-123","eventType":"heimlern.decision","occurredAt":"2024-03-12T10:15:30Z","payload":{"description":"Decision issued for learner","tags":["beta","preview"]},"context":{"source":"heimlern-app","locale":"de-DE"}}
