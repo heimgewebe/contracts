@@ -4,16 +4,16 @@
   "title": "OS Context State",
   "type": "object",
   "required": [
-    "contextId",
-    "collectedAt",
+    "context_id",
+    "collected_at",
     "state"
   ],
   "properties": {
-    "contextId": {
+    "context_id": {
       "type": "string",
       "minLength": 1
     },
-    "collectedAt": {
+    "collected_at": {
       "$ref": "#/$defs/dateTimeString"
     },
     "state": {
@@ -34,13 +34,13 @@
       },
       "additionalProperties": true
     },
-    "eventId": {
+    "event_id": {
       "type": "string"
     },
-    "eventType": {
+    "event_type": {
       "type": "string"
     },
-    "occurredAt": {
+    "occurred_at": {
       "$ref": "#/$defs/dateTimeString"
     },
     "payload": {
