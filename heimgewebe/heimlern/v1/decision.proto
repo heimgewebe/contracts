@@ -4,7 +4,7 @@ package heimgewebe.heimlern.v1;
 
 import "google/protobuf/timestamp.proto";
 
-option go_package = "github.com/heimgewebe/contracts/gen/go/heimgewebe/heimlern/v1;heimlernv1";
+option go_package = "github.com/heimgewebe/contracts-mirror/gen/go/heimgewebe/heimlern/v1;heimlernv1";
 
 // Decision encapsulates the outcome of the Heimlern recommendation engine.
 message Decision {

@@ -6,7 +6,7 @@ permissions:
 
 "on":
   # Usage from a caller:
-  # uses: heimgewebe/contracts/.github/workflows/contracts-ajv-reusable.yml@contracts-v1
+  # uses: heimgewebe/contracts-mirror/.github/workflows/contracts-ajv-reusable.yml@contracts-v1
   workflow_call:
     inputs:
       fixtures_glob:
@@ -15,7 +15,7 @@ permissions:
         type: string
         default: "fixtures/**/*.jsonl"
       contracts_ref:
-        description: "Ref of heimgewebe/contracts to fetch schemas from"
+        description: "Ref of heimgewebe/contracts-mirror to fetch schemas from"
         required: false
         type: string
         default: "contracts-v1"
@@ -75,7 +75,7 @@ jobs:
       - name: Checkout contracts (schemas)
         uses: actions/checkout@v4
         with:
-          repository: heimgewebe/contracts
+          repository: heimgewebe/contracts-mirror
           ref: ${{ inputs.contracts_ref }}
           path: _contracts
           fetch-depth: 0
