@@ -4,7 +4,7 @@ package heimgewebe.aussen.v1;
 
 import "google/protobuf/timestamp.proto";
 
-option go_package = "github.com/heimgewebe/contracts/gen/go/heimgewebe/aussen/v1;aussenv1";
+option go_package = "github.com/heimgewebe/contracts-mirror/gen/go/heimgewebe/aussen/v1;aussenv1";
 
 // EventEnvelope describes a domain event that originated from the Aussen boundary
 // of the Heimgewebe ecosystem. It provides a consistent contract for external

@@ -23,7 +23,7 @@ OS-Kontext, Policy) liegen kanonisch im **metarepo**:
 - Diese Schemas sind Referenz für alle internen Repos:
   - `aussensensor`, `chronik`, `semantAH`, `hausKI`, `heimlern`, `mitschreiber`, …
 
-**contracts-Repo**
+**contracts-mirror-Repo**
 
 - Bietet Protobuf-Definitionen für:
   - `aussen/v1`
