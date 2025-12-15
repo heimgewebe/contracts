@@ -1,6 +1,8 @@
-# Contracts Repository
+This repository mirrors and validates canonical contracts.
+Normative schemas live exclusively in heimgewebe/metarepo.
+No contract definitions originate here.
 
-Dieses Repository enthält alle Service- und Event-Verträge des Heimgewebe-Ökosystems.
+# Contracts Repository
 
 ## Single Source of Truth
 
@@ -15,7 +17,7 @@ vorgesehenen Sync-/Publish-Mechanismen spiegeln.
 
 ## Inhalte
 - **`proto/`** – gRPC/Protobuf-Contracts für RPC-Kommunikation
-- **`json/`** – JSON Schemas für Event-Payloads (AJV-kompatibel)
+- **`json/`** – JSON Schemas für Event-Payloads (AJV-kompatibel, generiert; bitte nicht manuell pflegen)
 - **`fixtures/`** – Beispiel-Events für CI-Validierung
 
 ## CI

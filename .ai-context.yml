@@ -9,8 +9,8 @@ system_context:
 
 project:
   name: contracts
-  summary: Central contract repo providing JSON/Proto schemas and fixtures.
-  role: schema_contract_provider
+  summary: Mirror + validation surface for canonical contracts; no source schemas live here.
+  role: contract_mirror_and_validation
   primary_language: mixed
   visibility: internal
 
