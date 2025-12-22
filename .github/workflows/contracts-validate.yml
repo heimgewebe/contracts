@@ -178,9 +178,25 @@ jobs:
 
           echo "::notice::✅ Guard passed"
 
+  mirror-drift:
+    name: "Guard: mirror schemas stay in sync with metarepo"
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Check canonical mirrors
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y curl
+          bash scripts/check-canonical-mirrors.sh
+
   validate:
     name: "Validate fixtures via reusable workflow"
-    needs: [version-sync-check, guard]
+    needs: [version-sync-check, guard, mirror-drift]
     uses: heimgewebe/contracts-mirror/.github/workflows/contracts-ajv-reusable.yml@contracts-v1
     secrets: inherit
     with:

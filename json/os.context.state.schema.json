@@ -2,6 +2,7 @@
   "$id": "https://heimgewebe.de/schemas/os.context.state.schema.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "OS Context State",
+  "$comment": "Canonical source lives in metarepo/contracts/os.context.state.schema.json; this file is a mirror for validation.",
   "type": "object",
   "required": [
     "context_id",
@@ -32,6 +33,10 @@
           "minimum": 0
         }
       },
+      "required": [
+        "mode",
+        "version"
+      ],
       "additionalProperties": true
     },
     "event_id": {
