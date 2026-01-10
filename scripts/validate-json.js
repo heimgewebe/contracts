@@ -32,31 +32,76 @@ async function loadJsonLines(filePath) {
     .map((line) => JSON.parse(line));
 }
 
+function removeExtension(filePath, extension) {
+  return filePath.endsWith(extension)
+    ? filePath.slice(0, -extension.length)
+    : filePath;
+}
+
+function normalizeRelativePath(filePath) {
+  return filePath.split(path.sep).join("/");
+}
+
 async function main() {
-  const schemaFiles = (await collectFiles(schemaDir)).filter((file) =>
-    file.endsWith(".schema.json"),
+  let hasErrors = false;
+
+  const collectFilesOrEmpty = async (directory, label) => {
+    try {
+      return await collectFiles(directory);
+    } catch (error) {
+      if (error && error.code === "ENOENT") {
+        hasErrors = true;
+        console.error(`::error::Missing ${label} directory: ${directory}`);
+        return [];
+      }
+      throw error;
+    }
+  };
+
+  const schemaFiles = (await collectFilesOrEmpty(schemaDir, "schema")).filter(
+    (file) => file.endsWith(".schema.json"),
+  );
+  const fixtureFiles = (
+    await collectFilesOrEmpty(fixturesDir, "fixture")
+  ).filter((file) => file.endsWith(".jsonl"));
+  const fixtureNames = new Set(
+    fixtureFiles.map((file) =>
+      normalizeRelativePath(
+        removeExtension(path.relative(fixturesDir, file), ".jsonl"),
+      ),
+    ),
   );
 
   const ajv = new Ajv2020({ allErrors: true, strict: true });
   addCustomFormats(ajv);
-
-  let hasErrors = false;
 
   for (const schemaFile of schemaFiles) {
     const schemaSource = await fs.readFile(schemaFile, "utf8");
     const schema = JSON.parse(schemaSource);
     const validate = ajv.compile(schema);
 
-    const schemaName = path.basename(schemaFile, ".schema.json");
+    const schemaName = removeExtension(
+      normalizeRelativePath(path.relative(schemaDir, schemaFile)),
+      ".schema.json",
+    );
     const fixturePath = path.join(fixturesDir, `${schemaName}.jsonl`);
 
     let instances = [];
     try {
       instances = await loadJsonLines(fixturePath);
     } catch (error) {
+      if (error && error.code === "ENOENT") {
+        hasErrors = true;
+        console.error(
+          `::error::No fixtures found for schema ${schemaName}: ${fixturePath}`,
+        );
+        continue;
+      }
+      hasErrors = true;
       console.error(
-        `::notice::No fixtures found for schema ${schemaName}: ${fixturePath}`,
+        `::error::Failed to load fixtures for schema ${schemaName}: ${fixturePath}`,
       );
+      console.error(error);
       continue;
     }
 
@@ -67,6 +112,19 @@ async function main() {
         console.error(`Validation failed for ${schemaName} line ${index + 1}`);
         console.error(validate.errors);
       }
+    }
+    fixtureNames.delete(schemaName);
+  }
+
+  if (fixtureNames.size > 0) {
+    hasErrors = true;
+    for (const fixtureName of fixtureNames) {
+      console.error(
+        `::error::No schema found for fixture ${fixtureName}: ${path.join(
+          fixturesDir,
+          `${fixtureName}.jsonl`,
+        )}`,
+      );
     }
   }
 
