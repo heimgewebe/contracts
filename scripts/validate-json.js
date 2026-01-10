@@ -84,7 +84,8 @@ async function main() {
       normalizeRelativePath(path.relative(schemaDir, schemaFile)),
       ".schema.json",
     );
-    const fixturePath = path.join(fixturesDir, `${schemaName}.jsonl`);
+    const fixturePath =
+      path.join(fixturesDir, ...schemaName.split("/")) + ".jsonl";
 
     let instances = [];
     try {
@@ -120,10 +121,9 @@ async function main() {
     hasErrors = true;
     for (const fixtureName of fixtureNames) {
       console.error(
-        `::error::No schema found for fixture ${fixtureName}: ${path.join(
-          fixturesDir,
-          `${fixtureName}.jsonl`,
-        )}`,
+        `::error::No schema found for fixture ${fixtureName}: ${
+          path.join(fixturesDir, ...fixtureName.split("/")) + ".jsonl"
+        }`,
       );
     }
   }
